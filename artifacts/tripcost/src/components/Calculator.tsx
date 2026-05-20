@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Hotel, UtensilsCrossed, Bus, Camera, Stamp, Plane, ShieldAlert, Calculator, RotateCcw, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Hotel, UtensilsCrossed, Bus, Camera, Stamp, Plane, ShieldAlert, Calculator, RotateCcw, TrendingUp, TrendingDown, Minus, AlertCircle } from "lucide-react";
 import { travelCountries } from "../data/travelCountries";
 import { useApp } from "../context/AppContext";
 
@@ -8,15 +8,7 @@ type TravelStyle = "budget" | "standard" | "luxury";
 
 const STYLE_ICONS = { budget: "🎒", standard: "🏨", luxury: "✨" };
 
-const LINE_ITEMS = [
-  { key: "hotel", icon: Hotel, perDay: true },
-  { key: "food", icon: UtensilsCrossed, perDay: true },
-  { key: "transport", icon: Bus, perDay: true },
-  { key: "activities", icon: Camera, perDay: true },
-  { key: "visa", icon: Stamp, perDay: false },
-  { key: "flight", icon: Plane, perDay: false },
-  { key: "emergency", icon: ShieldAlert, perDay: false },
-] as const;
+const DISCLAIMER = "TripCost provides rough travel budget estimates for planning purposes only. Actual prices may vary by city, season, booking time, exchange rates, visa rules, and traveler preferences.";
 
 export function CalculatorSection() {
   const { t } = useApp();
@@ -27,29 +19,32 @@ export function CalculatorSection() {
   const [style, setStyle] = useState<TravelStyle>("standard");
   const [results, setResults] = useState<null | {
     hotel: number; food: number; transport: number; activities: number;
-    visa: number; flight: number; emergency: number; grandTotal: number; dailyAverage: number;
+    visa: number; flight: number; emergency: number;
+    grandTotal: number; dailyAverage: number;
+    minEstimate: number; maxEstimate: number;
   }>(null);
 
   const filtered = travelCountries.filter(c =>
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.code.toLowerCase().includes(search.toLowerCase())
+    c.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const calculate = () => {
     if (!selectedCountry || !days) return;
     const d = Number(days);
-    const costs = selectedCountry.costs[style];
-    const hotel = costs.hotel * d;
-    const food = costs.food * d;
-    const transport = costs.transport * d;
-    const activities = costs.activities * d;
-    const visa = costs.visa;
-    const flight = costs.flight;
-    const emergency = costs.emergency;
+    const costs = selectedCountry[style];
+    const hotel = costs.hotelPerNight * d;
+    const food = costs.foodPerDay * d;
+    const transport = costs.localTransportPerDay * d;
+    const activities = costs.activitiesPerDay * d;
+    const visa = selectedCountry.visaCost;
+    const flight = selectedCountry.flightEstimate;
+    const emergency = selectedCountry.emergencyExtra;
     const subtotal = hotel + food + transport + activities + visa + flight + emergency;
     const grandTotal = Math.round(subtotal);
     const dailyAverage = Math.round(subtotal / d);
-    setResults({ hotel, food, transport, activities, visa, flight, emergency, grandTotal, dailyAverage });
+    const minEstimate = Math.round(grandTotal * 0.9);
+    const maxEstimate = Math.round(grandTotal * 1.15);
+    setResults({ hotel, food, transport, activities, visa, flight, emergency, grandTotal, dailyAverage, minEstimate, maxEstimate });
   };
 
   const reset = () => {
@@ -73,6 +68,16 @@ export function CalculatorSection() {
   ];
 
   const formatCost = (n: number) => `$${Math.round(n).toLocaleString()}`;
+
+  const LINE_ITEMS = [
+    { key: "hotel", icon: Hotel, label: t.calculator.hotel, perDay: true },
+    { key: "food", icon: UtensilsCrossed, label: t.calculator.food, perDay: true },
+    { key: "transport", icon: Bus, label: t.calculator.transport, perDay: true },
+    { key: "activities", icon: Camera, label: t.calculator.activities, perDay: true },
+    { key: "visa", icon: Stamp, label: t.calculator.visa, perDay: false },
+    { key: "flight", icon: Plane, label: t.calculator.flight, perDay: false },
+    { key: "emergency", icon: ShieldAlert, label: t.calculator.emergency, perDay: false },
+  ] as const;
 
   return (
     <section id="calculator" className="py-24 bg-background">
@@ -101,7 +106,7 @@ export function CalculatorSection() {
                     <span className="flex items-center gap-3">
                       <span className="text-xl">{selectedCountry.flag}</span>
                       <span className="font-medium">{selectedCountry.name}</span>
-                      <span className="text-muted-foreground text-sm">({selectedCountry.continent})</span>
+                      <span className="text-muted-foreground text-sm">({selectedCountry.currency})</span>
                     </span>
                   ) : (
                     <span className="text-muted-foreground">{t.calculator.selectCountry}</span>
@@ -130,14 +135,14 @@ export function CalculatorSection() {
                         ) : (
                           filtered.map(c => (
                             <button
-                              key={c.code}
+                              key={c.name}
                               onClick={() => { setSelectedCountry(c); setDropdownOpen(false); setResults(null); }}
-                              className={`w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors text-start ${selectedCountry?.code === c.code ? "bg-primary/5 text-primary font-semibold" : ""}`}
-                              data-testid={`country-option-${c.code}`}
+                              className={`w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors text-start ${selectedCountry?.name === c.name ? "bg-primary/5 text-primary font-semibold" : ""}`}
+                              data-testid={`country-option-${c.name}`}
                             >
                               <span className="text-lg">{c.flag}</span>
                               <span className="flex-1 font-medium">{c.name}</span>
-                              <span className="text-muted-foreground text-xs">{c.continent}</span>
+                              <span className="text-muted-foreground text-xs">{c.currency}</span>
                             </button>
                           ))
                         )}
@@ -251,16 +256,14 @@ export function CalculatorSection() {
 
                   {/* Line Items */}
                   <div className="space-y-2.5 mb-6">
-                    {LINE_ITEMS.map(({ key, icon: Icon, perDay }) => {
+                    {LINE_ITEMS.map(({ key, icon: Icon, label, perDay }) => {
                       const amount = results[key as keyof typeof results] as number;
                       return (
                         <div key={key} className="flex items-center gap-3 py-2.5 px-4 bg-card rounded-xl border border-border/50">
                           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                             <Icon className="w-4 h-4 text-primary" />
                           </div>
-                          <span className="flex-1 text-sm font-medium text-foreground">
-                            {t.calculator[key as keyof typeof t.calculator] as string}
-                          </span>
+                          <span className="flex-1 text-sm font-medium text-foreground">{label}</span>
                           <span className="text-xs text-muted-foreground">
                             {perDay ? t.calculator.perDay : t.calculator.oneTime}
                           </span>
@@ -270,13 +273,20 @@ export function CalculatorSection() {
                     })}
                   </div>
 
-                  {/* Grand Total & Verdict */}
-                  <div className="grid sm:grid-cols-3 gap-4">
+                  {/* Grand Total, Range & Verdict */}
+                  <div className="grid sm:grid-cols-3 gap-4 mb-5">
                     <div className="sm:col-span-2 bg-primary rounded-2xl p-5 text-primary-foreground">
                       <div className="text-sm font-medium opacity-80 mb-1">{t.calculator.grandTotal}</div>
                       <div className="text-4xl font-black tabular-nums">{formatCost(results.grandTotal)}</div>
                       <div className="text-sm opacity-70 mt-1">
                         {t.calculator.dailyAverage}: {formatCost(results.dailyAverage)}/{t.calculator.perDay.replace("per ", "")}
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-white/20">
+                        <div className="text-xs font-medium opacity-75 mb-1">Estimated Budget Range</div>
+                        <div className="text-base font-bold opacity-90">
+                          {formatCost(results.minEstimate)} — {formatCost(results.maxEstimate)}
+                        </div>
+                        <div className="text-xs opacity-60 mt-0.5">Recommended: {formatCost(results.grandTotal)}</div>
                       </div>
                     </div>
 
@@ -295,6 +305,12 @@ export function CalculatorSection() {
                         {formatCost(results.dailyAverage)} {t.calculator.perDay}
                       </div>
                     </div>
+                  </div>
+
+                  {/* Disclaimer */}
+                  <div className="flex gap-3 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/40 rounded-xl">
+                    <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">{DISCLAIMER}</p>
                   </div>
                 </div>
               </motion.div>
