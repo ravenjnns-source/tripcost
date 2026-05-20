@@ -1,0 +1,76 @@
+Fix and improve the TripCost website localization and branding.
+
+Important:
+- Do not redesign the website.
+- Do not change the current layout.
+- Do not remove existing features.
+- Keep the TripCost brand colors and logo style.
+- Only fix favicon/logo branding and improve translations/localization.
+
+Tasks:
+
+1. Browser tab favicon/logo
+- Replace the default red/placeholder favicon shown in the browser tab with the TripCost logo.
+- Use the existing TripCost logo asset already used in the navbar.
+- Make sure favicon works in production after Cloudflare deployment.
+- Update index.html or the correct favicon references as needed.
+- If needed, create favicon files from the existing logo asset.
+
+2. Full language support
+The website currently changes some text, but not everything.
+When the user changes language, the whole visible website should switch to that language.
+
+Make sure these are translated:
+- Navbar links
+- Hero section
+- Calculator labels
+- Country selector placeholder
+- Travel days label
+- Travel style names
+- Calculate button
+- Result card titles
+- Cost breakdown labels
+- Hotel
+- Food
+- Local transport
+- Activities
+- Visa
+- Flight
+- Emergency extra
+- Total
+- Daily average
+- Estimated budget range
+- Recommended amount
+- Smart verdict
+- Disclaimer text
+- Popular destinations
+- How it works
+- Why choose TripCost
+- FAQ
+- Footer
+- Error/empty states
+- “Country not available” message
+
+3. Country names localization
+- Country names must also change based on the selected language.
+- Keep the internal country data in English for calculations, but add localized display names.
+- Add a clean translation map for country names for all supported languages:
+  English, Arabic, French, Spanish, German, Turkish, Portuguese, Hindi, Chinese, Japanese.
+- If full translation for all countries is too large, at minimum translate the display name for every country included in travelCountries.
+- The country dropdown must show country names in the selected language.
+- Search should work with both English names and translated names when possible.
+
+4. RTL support
+- Arabic must use proper RTL layout.
+- Text alignment, dropdowns, result cards, and calculator labels should look natural in Arabic.
+- Numbers and prices can remain in USD format, but labels should be Arabic.
+
+5. Language persistence
+- Save selected language in localStorage.
+- When the user refreshes the page, keep the last selected language.
+
+6. Final checks
+- Make sure the app builds successfully.
+- Make sure no TypeScript errors are introduced.
+- Make sure the production build still works with Cloudflare Pages.
+- Do not change build settings.

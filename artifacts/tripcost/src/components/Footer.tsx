@@ -25,13 +25,13 @@ export function Footer() {
             <p className="text-white/60 text-sm leading-relaxed max-w-xs">{t.footer.tagline}</p>
             <div className="flex items-center gap-2 mt-4 text-xs text-white/40">
               <Globe2 className="w-3.5 h-3.5 text-[#00b5c8]" />
-              10 languages · 20+ countries · Free forever
+              {t.footer.taglineSub}
             </div>
           </div>
 
           {/* Navigation */}
           <div>
-            <div className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">Navigate</div>
+            <div className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">{t.footer.navigate}</div>
             <ul className="space-y-2.5">
               {[
                 { label: t.nav.calculator, id: "calculator" },
@@ -54,9 +54,9 @@ export function Footer() {
 
           {/* Info */}
           <div>
-            <div className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">Info</div>
+            <div className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">{t.footer.info}</div>
             <ul className="space-y-2.5">
-              {["Privacy Policy", "Terms of Service", "About TripCost", "Contact"].map(item => (
+              {[t.footer.privacy, t.footer.terms, t.footer.about, t.footer.contact].map(item => (
                 <li key={item}>
                   <span className="text-sm text-white/60 cursor-default">{item}</span>
                 </li>
@@ -72,7 +72,7 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-2 text-xs text-white/30">
             <Plane className="w-3.5 h-3.5 text-[#3ecf4c]" />
-            Built for smarter travelers
+            {t.footer.built}
           </div>
         </div>
       </div>

@@ -3,15 +3,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Hotel, UtensilsCrossed, Bus, Camera, Stamp, Plane, ShieldAlert, Calculator, RotateCcw, TrendingUp, TrendingDown, Minus, AlertCircle } from "lucide-react";
 import { travelCountries } from "../data/travelCountries";
 import { useApp } from "../context/AppContext";
+import { getCountryName } from "../i18n/countryNames";
 
 type TravelStyle = "budget" | "standard" | "luxury";
 
 const STYLE_ICONS = { budget: "🎒", standard: "🏨", luxury: "✨" };
 
-const DISCLAIMER = "TripCost provides rough travel budget estimates for planning purposes only. Actual prices may vary by city, season, booking time, exchange rates, visa rules, and traveler preferences.";
-
 export function CalculatorSection() {
-  const { t } = useApp();
+  const { t, lang } = useApp();
   const [search, setSearch] = useState("");
   const [selectedCountry, setSelectedCountry] = useState<(typeof travelCountries)[0] | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -24,9 +23,12 @@ export function CalculatorSection() {
     minEstimate: number; maxEstimate: number;
   }>(null);
 
-  const filtered = travelCountries.filter(c =>
-    c.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = travelCountries.filter(c => {
+    const q = search.toLowerCase();
+    if (!q) return true;
+    const localName = getCountryName(c.name, lang).toLowerCase();
+    return c.name.toLowerCase().includes(q) || localName.includes(q);
+  });
 
   const calculate = () => {
     if (!selectedCountry || !days) return;
@@ -105,7 +107,7 @@ export function CalculatorSection() {
                   {selectedCountry ? (
                     <span className="flex items-center gap-3">
                       <span className="text-xl">{selectedCountry.flag}</span>
-                      <span className="font-medium">{selectedCountry.name}</span>
+                      <span className="font-medium">{getCountryName(selectedCountry.name, lang)}</span>
                       <span className="text-muted-foreground text-sm">({selectedCountry.currency})</span>
                     </span>
                   ) : (
@@ -133,18 +135,21 @@ export function CalculatorSection() {
                         {filtered.length === 0 ? (
                           <div className="px-4 py-6 text-center text-muted-foreground text-sm">{t.calculator.noData}</div>
                         ) : (
-                          filtered.map(c => (
-                            <button
-                              key={c.name}
-                              onClick={() => { setSelectedCountry(c); setDropdownOpen(false); setResults(null); }}
-                              className={`w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors text-start ${selectedCountry?.name === c.name ? "bg-primary/5 text-primary font-semibold" : ""}`}
-                              data-testid={`country-option-${c.name}`}
-                            >
-                              <span className="text-lg">{c.flag}</span>
-                              <span className="flex-1 font-medium">{c.name}</span>
-                              <span className="text-muted-foreground text-xs">{c.currency}</span>
-                            </button>
-                          ))
+                          filtered.map(c => {
+                            const localName = getCountryName(c.name, lang);
+                            return (
+                              <button
+                                key={c.name}
+                                onClick={() => { setSelectedCountry(c); setDropdownOpen(false); setResults(null); setSearch(""); }}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors text-start ${selectedCountry?.name === c.name ? "bg-primary/5 text-primary font-semibold" : ""}`}
+                                data-testid={`country-option-${c.name}`}
+                              >
+                                <span className="text-lg">{c.flag}</span>
+                                <span className="flex-1 font-medium">{localName}</span>
+                                <span className="text-muted-foreground text-xs">{c.currency}</span>
+                              </button>
+                            );
+                          })
                         )}
                       </div>
                     </div>
@@ -247,7 +252,7 @@ export function CalculatorSection() {
                     {selectedCountry && (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <span className="text-lg">{selectedCountry.flag}</span>
-                        <span>{selectedCountry.name}</span>
+                        <span>{getCountryName(selectedCountry.name, lang)}</span>
                         <span>·</span>
                         <span>{days} {t.calculator.days_label}</span>
                       </div>
@@ -279,14 +284,14 @@ export function CalculatorSection() {
                       <div className="text-sm font-medium opacity-80 mb-1">{t.calculator.grandTotal}</div>
                       <div className="text-4xl font-black tabular-nums">{formatCost(results.grandTotal)}</div>
                       <div className="text-sm opacity-70 mt-1">
-                        {t.calculator.dailyAverage}: {formatCost(results.dailyAverage)}/{t.calculator.perDay.replace("per ", "")}
+                        {t.calculator.dailyAverage}: {formatCost(results.dailyAverage)}/{t.calculator.days_label}
                       </div>
                       <div className="mt-3 pt-3 border-t border-white/20">
-                        <div className="text-xs font-medium opacity-75 mb-1">Estimated Budget Range</div>
+                        <div className="text-xs font-medium opacity-75 mb-1">{t.calculator.budgetRange}</div>
                         <div className="text-base font-bold opacity-90">
                           {formatCost(results.minEstimate)} — {formatCost(results.maxEstimate)}
                         </div>
-                        <div className="text-xs opacity-60 mt-0.5">Recommended: {formatCost(results.grandTotal)}</div>
+                        <div className="text-xs opacity-60 mt-0.5">{t.calculator.recommended}: {formatCost(results.grandTotal)}</div>
                       </div>
                     </div>
 
@@ -310,7 +315,7 @@ export function CalculatorSection() {
                   {/* Disclaimer */}
                   <div className="flex gap-3 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/40 rounded-xl">
                     <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">{DISCLAIMER}</p>
+                    <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">{t.calculator.disclaimer}</p>
                   </div>
                 </div>
               </motion.div>
