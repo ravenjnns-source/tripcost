@@ -1,0 +1,156 @@
+Build a highly professional, modern, premium travel budget calculator website called “TripCost”.
+
+Important branding requirements:
+- The website name must be: TripCost
+- Use the uploaded TripCost logo in the header/navbar and wherever suitable for branding
+- Use the logo’s color palette as the main design system:
+  - deep navy blue
+  - bright teal / cyan
+  - small green accent
+- The whole UI should feel clean, elegant, premium, and very organized
+- The design should look like a polished startup / SaaS product
+- Make the visual presentation amazing, balanced, modern, and professional
+
+Tech requirements:
+- Use React
+- Use Tailwind CSS
+- No backend
+- No database
+- No paid APIs
+- Keep the code clean and easy to maintain
+
+Website purpose:
+TripCost helps users estimate how much money they need to travel to a country based on:
+- destination country
+- number of travel days
+- travel style:
+  Budget / Standard / Luxury
+
+Main calculator behavior:
+- User selects a country
+- User enters number of travel days
+- User selects travel style
+- On clicking Calculate, show:
+  - Hotel total
+  - Food total
+  - Local transport total
+  - Activities total
+  - Visa cost
+  - Flight estimate
+  - Emergency extra
+  - Grand total
+  - Daily average cost
+  - Smart verdict:
+    Very affordable / Moderate / Expensive
+
+Data structure:
+- Create a separate file:
+  src/data/travelCountries.js
+- Import data from that file
+- For now, use sample data structure that can later be expanded easily
+
+Multilanguage requirements:
+The website must support 10 languages total.
+Default language must be English.
+
+Add a language switcher at the top of the page / in the top navbar.
+
+Supported languages:
+1. English (default)
+2. Arabic
+3. French
+4. Spanish
+5. German
+6. Turkish
+7. Portuguese
+8. Hindi
+9. Chinese
+10. Japanese
+
+Language switcher requirements:
+- It must be clearly visible at the top
+- It should look elegant and professional
+- Switching language should update all main UI texts
+- Arabic must be fully supported with RTL layout
+- French must be fully supported
+- Organize translations cleanly, for example with translation objects or files
+
+Design / layout requirements:
+Create a premium, highly organized layout with these sections:
+
+1. Top Navbar
+- Logo on the left
+- Website name TripCost
+- Navigation links
+- Language switcher at the top
+- Theme toggle (light/dark mode)
+
+2. Hero Section
+- Strong professional headline
+- Short subheadline explaining the value
+- Main CTA button
+- Beautiful layout with text + visual illustration/card
+- Make it look premium and modern
+
+3. Calculator Section
+- Clean card-based calculator UI
+- Country dropdown with search
+- Travel days input
+- Travel style selector
+- Calculate button
+- Result card with excellent spacing and visual hierarchy
+
+4. Popular Destinations Section
+- Cards for popular countries
+- Show quick preview of estimated costs
+- Attractive and clean layout
+
+5. How It Works Section
+- 3 simple steps
+- Nice icons / visuals
+- Very clean alignment
+
+6. Why Choose TripCost Section
+- Highlight speed, simplicity, planning help, travel budgeting clarity
+- Make this section persuasive and professional
+
+7. FAQ Section
+- Clean accordion style
+- Short useful answers
+
+8. Footer
+- TripCost branding
+- useful links
+- language reminder
+- copyright
+- polished structure
+
+Visual style requirements:
+- Minimal but premium
+- Excellent typography
+- Spacious layout
+- Soft shadows
+- Rounded corners
+- Smooth hover effects
+- Beautiful cards
+- Balanced spacing
+- Strong visual hierarchy
+- Modern SaaS-style sections
+- Clean responsive design on mobile, tablet, and desktop
+
+Special UI requirements:
+- Add light mode and dark mode
+- Make the site feel fast and premium
+- Add subtle travel-related icons where suitable
+- Keep everything visually consistent with the logo
+- Use the logo colors consistently, not random colors
+
+Empty / unavailable country state:
+If a country is not available, show:
+“We don’t have enough travel cost data for this destination yet. Please choose one of the available countries.”
+
+Extra note:
+- Make the site look production-ready
+- The first impression must be impressive
+- The layout must be very organized and professional
+- The multilingual system must be built properly from the start
